@@ -3,7 +3,7 @@ from django.core.validators import MinValueValidator
 from postgres_copy import CopyManager
 # Create your models here.
 
-class Matches(models.Model):
+class Match(models.Model):
     season = models.PositiveIntegerField()
     city = models.CharField(max_length=200,null=True)
     date = models.DateField (auto_now=False, auto_now_add=False)
@@ -26,8 +26,8 @@ class Matches(models.Model):
     def __str__(self):
         return f'{self.season} => {self.winner}'
 
-class Deliveries(models.Model):
-    match_id = models.ForeignKey(Matches, on_delete=models.CASCADE)
+class Delivery(models.Model):
+    match = models.ForeignKey(Match, on_delete=models.CASCADE)
     inning = models.PositiveIntegerField()
     batting_team = models.CharField(max_length=100)
     bowling_team = models.CharField(max_length=100)

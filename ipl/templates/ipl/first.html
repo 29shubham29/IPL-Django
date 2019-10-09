@@ -1,0 +1,10 @@
+{% extends 'ipl/base.html' %}
+{% block content %}
+<div class="container">
+    <h2>IPL Fun!!</h2>
+    <button onclick=matchesPlayed() class="btn btn-primary">Mathces per
+        Season</button>
+    <button onclick=matchesWon() class="btn btn-primary">Mathces</button>
+    <div id="container" style="width:100%; height:400px;"></div>
+    {% endblock content %}
+</div>

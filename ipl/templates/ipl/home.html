@@ -1,0 +1,9 @@
+{% extends 'ipl/base.html'%}
+
+{% block content %}
+{% for match in matches %}
+<h4>{{match.season}} :: {{ match.matches }}
+</h4>
+{% endfor %}
+<div id="container" style="width:100%; height:400px;"></div>
+{% endblock %}
