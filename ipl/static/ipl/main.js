@@ -74,3 +74,40 @@ const drawData = (years, seriesdata) => {
     series: seriesdata
   });
 };
+
+const extraRuns = () => {
+  fetch("http://localhost:8000/api/third")
+    .then(response => response.json())
+    .then(res => drawExtras(res["teams"], res["extras"]));
+};
+const drawExtras = (teams, extras) => {
+  console.log(teams, extras);
+  var chart = Highcharts.chart("container", {
+    title: {
+      text: "Extra runs"
+    },
+    subtitle: {
+      text: "IPL Data"
+    },
+    xAxis: {
+      title: {
+        text: "Teams"
+      },
+      categories: teams
+    },
+    yAxis: {
+      title: {
+        text: "Extra runs"
+      }
+    },
+    series: [
+      {
+        type: "column",
+        name: "Teams",
+        colorByPoint: true,
+        data: extras,
+        showInLegend: false
+      }
+    ]
+  });
+};

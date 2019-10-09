@@ -1,8 +1,8 @@
 import json
 from django.shortcuts import render, redirect
 from django.http import HttpResponse,JsonResponse
-from django.db.models import Count
-from .models import Match
+from django.db.models import Count,Sum
+from .models import Match,Delivery
 # Create your views here.
 
 def match_per_season(request):
@@ -59,5 +59,21 @@ def match_won_per_team(request):
     print(teamwons)
     return  JsonResponse(teamwons)
 
-def second(request):
-    return render(request,'ipl/second.html')
+def extra_runs_team(request):
+    '''api route for third part'''
+
+    extra_runs = Delivery.objects.filter(match__season=2016).values('bowling_team').annotate(extras=Sum('extra_runs')).order_by('extras')
+    teams = list()
+    extra = list()
+    for runs in extra_runs:
+        teams.append(runs['bowling_team'])
+        extra.append(runs['extras'])
+    print(teams)
+    print(extra)
+    extra_runs_per_team = {
+        'teams':teams,
+        'extras':extra
+    }
+
+
+    return JsonResponse(extra_runs_per_team)
