@@ -1,7 +1,8 @@
 import json
 from django.shortcuts import render, redirect
 from django.http import HttpResponse,JsonResponse
-from django.db.models import Count,Sum
+from django.db.models import Count,Sum,FloatField, F, When, Case
+from django.db.models.functions import Cast
 from .models import Match,Delivery
 # Create your views here.
 
@@ -77,3 +78,22 @@ def extra_runs_team(request):
 
 
     return JsonResponse(extra_runs_per_team)
+
+def economical_bowler(request):
+    '''api for fourth question'''
+
+    economy_details = Delivery.objects.filter(match__season=2015,is_super_over=0).values('bowler').annotate(runs=(Sum('total_runs')-Sum('bye_runs')-Sum('legbye_runs'))*6.0).annotate(balls=(Count('ball')-Count(Case(When(noball_runs__gt=0, then=1)))-Count(Case(When(wide_runs__gt=0, then=1))))).annotate(economy= Cast(F('runs')/F('balls'), FloatField())).order_by('economy')[:10]
+
+    bowlers = list()
+    economy = list()
+    for data in economy_details:
+        bowlers.append(data['bowler'])
+        economy.append(data['economy'])
+
+    bowler_economy = {
+        'bowlers':bowlers,
+        'economy':economy
+    }
+    return JsonResponse(bowler_economy)
+
+

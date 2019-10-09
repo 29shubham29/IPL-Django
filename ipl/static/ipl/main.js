@@ -111,3 +111,41 @@ const drawExtras = (teams, extras) => {
     ]
   });
 };
+
+// fourth question
+const economy = () => {
+  fetch("http://localhost:8000/api/fourth")
+    .then(response => response.json())
+    .then(res => drawEconomy(res["bowlers"], res["economy"]));
+};
+
+const drawEconomy = (bowlers, economy) => {
+  var chart = Highcharts.chart("container", {
+    title: {
+      text: "Economical Bowlers"
+    },
+    subtitle: {
+      text: "IPL Data"
+    },
+    xAxis: {
+      title: {
+        text: "Bowler"
+      },
+      categories: bowlers
+    },
+    yAxis: {
+      title: {
+        text: "Economy"
+      }
+    },
+    series: [
+      {
+        type: "column",
+        name: "Teams",
+        colorByPoint: true,
+        data: economy,
+        showInLegend: false
+      }
+    ]
+  });
+};
