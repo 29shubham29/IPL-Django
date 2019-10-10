@@ -149,3 +149,40 @@ const drawEconomy = (bowlers, economy) => {
     ]
   });
 };
+
+const sixes = () => {
+  fetch("http://localhost:8000/api/fifth")
+    .then(response => response.json())
+    .then(res => drawSixes(res["batsman"], res["sixes"]));
+};
+
+const drawSixes = (batsman, sixes) => {
+  var chart = Highcharts.chart("container", {
+    title: {
+      text: "Sixes in IPL 2016"
+    },
+    subtitle: {
+      text: "IPL Data"
+    },
+    xAxis: {
+      title: {
+        text: "Batsman"
+      },
+      categories: batsman
+    },
+    yAxis: {
+      title: {
+        text: "Sixes"
+      }
+    },
+    series: [
+      {
+        type: "column",
+        name: "Teams",
+        colorByPoint: true,
+        data: sixes,
+        showInLegend: false
+      }
+    ]
+  });
+};
