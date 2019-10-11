@@ -99,20 +99,6 @@ def sixes_hitters(request):
     }
     return JsonResponse(six_details)
 
-class MatchForm(ModelForm):
-    class Meta:
-        model = Match
-        fields = '__all__'
-
-class DeliveryForm(ModelForm):
-    class Meta:
-        model = Delivery
-        fields = '__all__'
-
-# def create_delivery(request):
-#     form = DeliveryForm()
-#     return render(request,'ipl/delivery.html',{'form':form})
-
 #apis for crud operations
 '''api for matches'''
 @csrf_exempt
@@ -122,7 +108,34 @@ def get_match(request,id):
             match = Match.objects.values().get(pk=id)
         except Match.DoesNotExist:
             raise Http404
+    elif request.method == 'PUT':
+        if request.body:
+            data = json.loads(request.body.decode('utf-8'))
+            Match.objects.filter(pk=id).update(**data)
+            match = {'result':f'Sucessfully updated match at {id}'}
+        else:
+            return JsonResponse({'error':'no-data'})
     return JsonResponse(match)
+
+'''api for delivery'''
+@csrf_exempt
+def get_delivery(request,id):
+    if request.method == 'DELETE':
+        delivery = Delivery.objects.get(pk=id).delete()
+        delivery = {'result':"deleted"}
+    elif request.method == 'GET':
+        try:
+            delivery = Delivery.objects.values().get(pk=id)
+        except Delivery.DoesNotExist:
+            raise Http404
+    elif request.method == 'PUT':
+        if request.body:
+            data = json.loads(request.body.decode('utf-8'))
+            Delivery.objects.filter(pk=id).update(**data)
+            delivery = {'result':f'Sucessfully updated delivery at {id}'}
+        else:
+            return JsonResponse({'error':'no-data'})
+    return JsonResponse(delivery, safe=False)
 
 def save_data(data, key):
     try:
@@ -166,19 +179,7 @@ def create_match(request):
         result = {'result':f'sucessfully added data at {match.id}'}
     return JsonResponse(result)
 
-'''api for delivery'''
-@csrf_exempt
-def get_delivery(request,id=None):
-    if request.method == 'DELETE':
-        delivery = Delivery.objects.get(pk=id).delete()
-        delivery = {'result':"deleted"}
-    elif request.method == 'GET':
-        try:
-            delivery = Delivery.objects.values().get(pk=id)
-        except Delivery.DoesNotExist:
-            raise Http404
-    return JsonResponse(delivery, safe=False)
-
+'''api for delivery creation'''
 @csrf_exempt
 def create_delivery(request):
     if request.method == 'POST':
@@ -188,29 +189,35 @@ def create_delivery(request):
             return JsonResponse({'error':'no-data'})
         try:
             delivery = Delivery()
-            delivery.match          = save_data(data,'match_id')
-            delivery.inning         = save_data(data,'inning')
-            delivery.batting_team   = save_data(data,'batting_team')
-            delivery.bowling_team   = save_data(data,'bowling_team')
-            delivery.over           = save_data(data,'over')
-            delivery.ball           = save_data(data,'ball')
-            delivery.batsman        = save_data(data,'batsman')
-            delivery.non_striker    = save_data(data,'non_striker')
-            delivery.bowler         = save_data(data,'bowler')
-            delivery.is_super_over  = save_data(data,'is_super_over')
-            name = save_data(data,'name')
-        except KeyError as e:
-            return JsonResponse(str(e),safe=False)
+            delivery.match_id         = save_data(data,'match_id')
+            delivery.inning           = save_data(data,'inning')
+            delivery.batting_team     = save_data(data,'batting_team')
+            delivery.bowling_team     = save_data(data,'bowling_team')
+            delivery.over             = save_data(data,'over')
+            delivery.ball             = save_data(data,'ball')
+            delivery.batsman          = save_data(data,'batsman')
+            delivery.non_striker      = save_data(data,'non_striker')
+            delivery.bowler           = save_data(data,'bowler')
+            delivery.is_super_over    = save_data(data,'is_super_over')
+            delivery.wide_runs        = save_data(data,'wide_runs')
+            delivery.bye_runs         = save_data(data,'bye_runs')
+            delivery.legbye_runs      = save_data(data,'legbye_runs')
+            delivery.noball_runs      = save_data(data,'noball_runs')
+            delivery.penalty_runs     = save_data(data,'penalty_runs')
+            delivery.batsman_runs     = save_data(data,'batsman_runs')
+            delivery.extra_runs       = save_data(data,'extra_runs')
+            delivery.total_runs       = save_data(data,'total_runs')
+            delivery.player_dismissed = save_data(data,'player_dismissed')
+            delivery.dismissal_kind   = save_data(data,'dismissal_kind')
+            delivery.fielder          = save_data(data,'fielder')
+            delivery.save()
+        except KeyError as keyerror:
+            return JsonResponse(str(keyerror),safe=False)
         except Exception as error:
             return JsonResponse(str(error),safe=False)
-    delivery = {'data':name}
+    delivery = {'result':f'delivery inserted at {delivery.id}'}
     return JsonResponse(delivery, safe=False)
 
-
-def match_get(request,id):
-    match = Match.objects.get(pk=id)
-    form = MatchForm(instance=match)
-    return render(request,'ipl/form.html',{'form':form})
 
 #helper functions for above functions
 '''helper function for economical_bowler'''
