@@ -9,6 +9,7 @@ from django.db.models import Count,Sum,FloatField, F, When, Case
 from django.db.models.functions import Cast
 from django.forms import ModelForm
 from django.views.decorators.csrf import csrf_exempt
+from django.forms.models import model_to_dict
 from .models import Match,Delivery
 # Create your views here.
 
@@ -108,32 +109,103 @@ class DeliveryForm(ModelForm):
         model = Delivery
         fields = '__all__'
 
-# def match_get(request,id):
+# def create_delivery(request):
+#     form = DeliveryForm()
+#     return render(request,'ipl/delivery.html',{'form':form})
 
-#     if request.method == 'GET':
-#         try:
-#             match = Match.objects.values().get(pk=id)
-#         except Match.DoesNotExist:
-#             raise Http404
-#         print(match)
-#     if request.method == 'DELETE':
-#         match = Match.objects.filter(pk=id).delete()
-
-def create_delivery(request):
-    form = DeliveryForm()
-    return render(request,'ipl/delivery.html',{'form':form})
-#     return JsonResponse(match)
 #apis for crud operations
+'''api for matches'''
 @csrf_exempt
-def get_delivery(request,id):
+def get_match(request,id):
+    if request.method == 'GET':
+        try:
+            match = Match.objects.values().get(pk=id)
+        except Match.DoesNotExist:
+            raise Http404
+    return JsonResponse(match)
+
+def save_data(data, key):
+    try:
+        return data[key]
+    except:
+        raise KeyError(f'Missing argument :: {key}')
+
+'''api for match creation'''
+@csrf_exempt
+def create_match(request):
+    if request.method == 'POST':
+        if request.body:
+            data = json.loads(request.body.decode('utf-8'))
+        else:
+            return JsonResponse({'error':'No data'})
+        try:
+            match = Match()
+            match.season         = save_data(data,'season')
+            match.city           = save_data(data,'city')
+            match.date           = save_data(data,'date')
+            match.team1          = save_data(data,'team1')
+            match.team2          = save_data(data,'team2')
+            match.toss_winner    = save_data(data,'toss_winner')
+            match.toss_decision  = save_data(data,'toss_decision')
+            match.result         = save_data(data,'result')
+            match.dl_applied     = save_data(data,'dl_applied')
+            match.winner         = save_data(data,'winner')
+            match.win_by_runs    = save_data(data,'win_by_runs')
+            match.player_of_match= save_data(data,'player_of_match')
+            match.venue          = save_data(data,'venue')
+            match.umpire1        = save_data(data,'umpire1')
+            match.umpire2        = save_data(data,'umpire2')
+            match.umpire3        = save_data(data,'umpire3')
+            match.save()
+        except KeyError as error:
+            result = {'error':str(error)}
+            return JsonResponse(result)
+        except Exception as error:
+            result = {'error':str(error)}
+            return JsonResponse(result)
+        result = {'result':f'sucessfully added data at {match.id}'}
+    return JsonResponse(result)
+
+'''api for delivery'''
+@csrf_exempt
+def get_delivery(request,id=None):
     if request.method == 'DELETE':
         delivery = Delivery.objects.get(pk=id).delete()
+        delivery = {'result':"deleted"}
     elif request.method == 'GET':
         try:
             delivery = Delivery.objects.values().get(pk=id)
         except Delivery.DoesNotExist:
             raise Http404
     return JsonResponse(delivery, safe=False)
+
+@csrf_exempt
+def create_delivery(request):
+    if request.method == 'POST':
+        if request.body:
+            data  = json.loads(request.body.decode('utf-8'))
+        else:
+            return JsonResponse({'error':'no-data'})
+        try:
+            delivery = Delivery()
+            delivery.match          = save_data(data,'match_id')
+            delivery.inning         = save_data(data,'inning')
+            delivery.batting_team   = save_data(data,'batting_team')
+            delivery.bowling_team   = save_data(data,'bowling_team')
+            delivery.over           = save_data(data,'over')
+            delivery.ball           = save_data(data,'ball')
+            delivery.batsman        = save_data(data,'batsman')
+            delivery.non_striker    = save_data(data,'non_striker')
+            delivery.bowler         = save_data(data,'bowler')
+            delivery.is_super_over  = save_data(data,'is_super_over')
+            name = save_data(data,'name')
+        except KeyError as e:
+            return JsonResponse(str(e),safe=False)
+        except Exception as error:
+            return JsonResponse(str(error),safe=False)
+    delivery = {'data':name}
+    return JsonResponse(delivery, safe=False)
+
 
 def match_get(request,id):
     match = Match.objects.get(pk=id)

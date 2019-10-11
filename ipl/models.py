@@ -4,9 +4,11 @@ from postgres_copy import CopyManager
 # Create your models here.
 
 class Match(models.Model):
-    season = models.PositiveIntegerField()
+    class Meta:
+        unique_together = ['season','team1','team2','date']
+    season = models.PositiveIntegerField(null=True)
     city = models.CharField(max_length=200,null=True)
-    date = models.DateField (auto_now=False, auto_now_add=False)
+    date = models.DateField (auto_now=False, auto_now_add=False,null=True)
     team1 = models.CharField(max_length = 100,null=True)
     team2 = models.CharField(max_length=100,null=True)
     toss_winner = models.CharField(max_length=50,null=True)
@@ -27,6 +29,8 @@ class Match(models.Model):
         return f'{self.season} => {self.winner}'
 
 class Delivery(models.Model):
+    class Meta:
+        unique_together = ['match','batting_team','bowling_team']
     match = models.ForeignKey(Match, on_delete=models.CASCADE)
     inning = models.PositiveIntegerField()
     batting_team = models.CharField(max_length=100)
