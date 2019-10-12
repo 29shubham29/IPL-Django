@@ -74,6 +74,7 @@ def economical_bowler(request):
     '''api for fourth question'''
 
     economy_details = economy_helper()
+    print(economy_details)
     bowlers = list()
     economy = list()
     for data in economy_details:
@@ -85,6 +86,7 @@ def economical_bowler(request):
     }
     return JsonResponse(bowler_economy)
 
+@cache_page(CACHE_TTL)
 def sixes_hitters(request):
     '''api for fifth question'''
     batsman_details = Delivery.objects.filter(match__season=2016).values('batsman').annotate(sixes = Count(Case(When(batsman_runs=6, then=1)))).order_by('-sixes')[:10]
@@ -236,7 +238,7 @@ def create_delivery(request):
 #helper functions for above functions
 '''helper function for economical_bowler'''
 def economy_helper():
-    economy_query_set = Delivery.objects.filter(match__season=2015,is_super_over=0).values('bowler').annotate(runs=(Sum('total_runs')-Sum('bye_runs')-Sum('legbye_runs'))*6.0).annotate(balls=(Count('ball')-Count(Case(When(noball_runs__gt=0, then=1)))-Count(Case(When(wide_runs__gt=0, then=1))))).annotate(economy= Cast(F('runs')/F('balls'), FloatField())).order_by('economy')[:10]
+    economy_query_set = Delivery.objects.filter(match__season=2015,is_super_over=0).values('bowler').annotate(runs=(Sum('total_runs')-Sum('bye_runs')-Sum('legbye_runs'))*6.0).annotate(balls=(Count('ball')-Count(Case(When(noball_runs=0, then=1)))-Count(Case(When(wide_runs=0, then=1))))).annotate(economy= Cast(F('runs')/F('balls'), FloatField())).order_by('economy')[:10]
 
     return economy_query_set
 
